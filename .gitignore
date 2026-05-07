@@ -45,4 +45,11 @@ htmlcov/
 # === DOCKER ===
 .dockerignore
 docker-compose.override.yml
+
+# === TEST & ANALYSIS FILES (Local development only) ===
+test_*.py
+ANALYSE_*.md
+DIAGRAMMES_*.md
+PLAN_*.md
+run_all_scrapers.py
 " | Out-File -Encoding UTF8 .gitignore
