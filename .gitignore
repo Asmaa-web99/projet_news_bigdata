@@ -1,0 +1,48 @@
+# Créer .gitignore robuste
+@"
+# === CREDENTIALS & SECRETS ===
+.env
+.env.local
+.env.*.local
+credentials.json
+secrets.json
+
+# === PYTHON ===
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.Python
+venv/
+env/
+ENV/
+.venv
+
+# === DATA & LOGS ===
+data/
+logs/
+*.parquet
+*.json
+*.csv
+
+# === MINIO ===
+minio_data/
+
+# === IDE & OS ===
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# === TESTS & COVERAGE ===
+.pytest_cache/
+.coverage
+htmlcov/
+
+# === DOCKER ===
+.dockerignore
+docker-compose.override.yml
+" | Out-File -Encoding UTF8 .gitignore

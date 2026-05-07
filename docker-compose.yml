@@ -1,0 +1,103 @@
+services:
+
+  # --- DATA LAKE (MinIO) ---
+  minio:
+    image: minio/minio:latest
+    container_name: news_minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+
+  # --- STREAMING (Kafka) ---
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    container_name: news_zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    container_name: news_kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+  # --- DATA WAREHOUSE (PostgreSQL) ---
+  postgres_dwh:
+    image: postgres:15
+    container_name: news_dwh
+    environment:
+      POSTGRES_DB: news_warehouse
+      POSTGRES_USER: dwh_admin
+      POSTGRES_PASSWORD: dwh_password
+    ports:
+      - "5433:5432"
+    volumes:
+      - dwh_data:/var/lib/postgresql/data
+
+  # --- ORCHESTRATION (Airflow) ---
+  airflow_db:
+    image: postgres:15
+    container_name: news_airflow_db
+    environment:
+      - POSTGRES_USER=airflow
+      - POSTGRES_PASSWORD=airflow
+      - POSTGRES_DB=airflow
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U airflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  airflow:
+    image: apache/airflow:2.7.1
+    container_name: news_airflow
+    depends_on:
+      airflow_db:
+        condition: service_healthy
+    environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@airflow_db/airflow
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
+      - _PIP_ADDITIONAL_DEPENDENCIES=apache-airflow-providers-postgres requests beautifulsoup4 minio kafka-python pandas langdetect
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./scrapers:/opt/airflow/scrapers
+      - ./medallion:/opt/airflow/medallion
+      - ./warehouse:/opt/airflow/warehouse
+      - ./logs:/opt/airflow/logs
+    command: >
+      bash -c "sleep 10 &&
+               airflow db init && 
+               airflow users create --username airflow --password airflow --firstname Admin --lastname User --role Admin --email admin@example.com || true &&
+               (airflow scheduler & airflow webserver)"
+
+  # --- METABASE (Visualisation Pro) ---
+  metabase:
+    image: metabase/metabase:latest
+    container_name: news_metabase
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres_dwh
+
+volumes:
+  minio_data:
+  dwh_data:
