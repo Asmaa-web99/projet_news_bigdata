@@ -53,11 +53,19 @@ class RSSStreamProducer:
         self.kafka_broker = os.getenv('KAFKA_BROKER', 'localhost:9092')
         self.topic = os.getenv('KAFKA_TOPIC_NEWS', 'news_streaming')
         
-        self.producer = KafkaProducer(
-            bootstrap_servers=[self.kafka_broker],
-            value_serializer=lambda v: json.dumps(v, ensure_ascii=False).encode('utf-8'),
-            key_serializer=lambda k: k.encode('utf-8') if k else None,
-        )
+        try:
+            self.producer = KafkaProducer(
+                bootstrap_servers=[self.kafka_broker],
+                value_serializer=lambda v: json.dumps(v, ensure_ascii=False).encode('utf-8'),
+                key_serializer=lambda k: k.encode('utf-8') if k else None,
+                api_version_auto_timeout_ms=10000,
+                request_timeout_ms=30000,
+                connections_max_idle_ms=30000,
+            )
+        except Exception as e:
+            logger.error(f"❌ Erreur de connexion à Kafka ({self.kafka_broker}): {e}")
+            logger.error("Assurez-vous que Kafka est en cours d'exécution: docker-compose up -d")
+            raise
         
         # Cache déduplication (en mémoire pour cette session)
         self.seen_articles = set()

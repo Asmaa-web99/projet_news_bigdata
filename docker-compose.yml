@@ -34,7 +34,9 @@ services:
     environment:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
 
   # --- DATA WAREHOUSE (PostgreSQL) ---
@@ -65,16 +67,33 @@ services:
       retries: 5
 
   airflow:
-    image: apache/airflow:2.7.1
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: news_airflow
     depends_on:
       airflow_db:
         condition: service_healthy
+      kafka:
+        condition: service_started
+      minio:
+        condition: service_started
+      postgres_dwh:
+        condition: service_started
     environment:
       - AIRFLOW__CORE__EXECUTOR=LocalExecutor
       - AIRFLOW__CORE__SQL_ALCHEMY_CONN=postgresql+psycopg2://airflow:airflow@airflow_db/airflow
       - AIRFLOW__CORE__LOAD_EXAMPLES=False
-      - _PIP_ADDITIONAL_DEPENDENCIES=apache-airflow-providers-postgres requests beautifulsoup4 minio kafka-python pandas langdetect
+      - AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION=False
+      - MINIO_ENDPOINT=minio:9000
+      - MINIO_ACCESS_KEY=minioadmin
+      - MINIO_SECRET_KEY=minioadmin
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      - DWH_HOST=postgres_dwh
+      - DWH_PORT=5432
+      - DWH_DATABASE=news_warehouse
+      - DWH_USER=dwh_admin
+      - DWH_PASSWORD=dwh_password
     ports:
       - "8080:8080"
     volumes:
@@ -82,12 +101,17 @@ services:
       - ./scrapers:/opt/airflow/scrapers
       - ./medallion:/opt/airflow/medallion
       - ./warehouse:/opt/airflow/warehouse
+      - ./quality:/opt/airflow/quality
       - ./logs:/opt/airflow/logs
+      - ./data:/opt/airflow/data
+    networks:
+      - news_network
     command: >
-      bash -c "sleep 10 &&
+      bash -c "sleep 15 &&
                airflow db init && 
-               airflow users create --username airflow --password airflow --firstname Admin --lastname User --role Admin --email admin@example.com || true &&
-               (airflow scheduler & airflow webserver)"
+               airflow users create --username airflow --password airflow --firstname Admin --lastname User --role Admin --email admin@example.com 2>/dev/null || true &&
+               airflow dags unpause news_bigdata_pipeline 2>/dev/null || true &&
+               (airflow scheduler & airflow webserver --bind 0.0.0.0)"
 
   # --- METABASE (Visualisation Pro) ---
   metabase:
@@ -95,9 +119,27 @@ services:
     container_name: news_metabase
     ports:
       - "3000:3000"
+    environment:
+      - MB_DB_TYPE=postgres
+      - MB_DB_HOST=postgres_dwh
+      - MB_DB_PORT=5432
+      - MB_DB_NAME=news_warehouse
+      - MB_DB_USER=dwh_admin
+      - MB_DB_PASS=dwh_password
     depends_on:
       - postgres_dwh
+    networks:
+      - news_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   minio_data:
   dwh_data:
+
+networks:
+  news_network:
+    driver: bridge

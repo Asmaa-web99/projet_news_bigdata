@@ -1,63 +1,87 @@
-# 📰 Plateforme Big Data d'Analyse de Médias
+# 📰 NEWS BIG DATA PLATFORM
 
-Une plateforme complète de **Big Data** pour collecter, transformer et analyser en temps réel les articles de presse de sources multiples, avec orchestration, qualité des données et visualisation interactive.
+<div align="center">
 
-**Niveau :** Master/Ingénieur en Data Engineering & IA  
-**Status :** ✅ Production-Ready  
-**Deadline :** 10 mai 2026
+### **Plateforme Complète d'Ingestion, Transformation et Analyse de Médias**
+
+[![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://python.org)
+[![Docker](https://img.shields.io/badge/Docker-Compose-blue.svg)](https://docker.com)
+[![Airflow](https://img.shields.io/badge/Apache-Airflow-217346.svg)](https://airflow.apache.org)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-336791.svg)](https://postgresql.org)
+[![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen.svg)]()
+
+**Master Data Engineering & Big Data • Mai 2026**
+
+</div>
 
 ---
 
-## 🚀 DÉMARRAGE ULTRA RAPIDE (2 MINUTES)
+## 🎯 OBJECTIF DU PROJET
 
-### Option 1 : Script automatique (Windows PowerShell)
+Construire une **plateforme Big Data professionnelle et scalable** capable de :
 
-```powershell
-# Windows - Lancer le script
-.\start.ps1
-```
+✅ **Collecter** articles de presse depuis 5 sources (Hespress, BBC, Akhbarona, Al Jazeera, France Info)  
+✅ **Ingérer** via approche batch (horaire) et streaming (futur)  
+✅ **Transformer** selon l'architecture Médaillon (Bronze → Silver → Gold)  
+✅ **Analyser** sentiment, tendances, mots-clés  
+✅ **Gouverner** avec contrôles qualité et traçabilité complète  
+✅ **Visualiser** dans un Data Warehouse et tableaux de bord Metabase  
+✅ **Orchestrer** tout via Airflow avec UN seul point d'entrée
 
-### Option 2 : Commande manuelle
+---
+
+## 🚀 DÉMARRAGE EN 2 MINUTES
+
+### **Option A : Script Linux/Mac**
 
 ```bash
-# Linux/Mac/Windows (Git Bash)
-git clone https://github.com/Asmaa-web99/projet_news_bigdata.git
-cd projet_news_bigdata
-docker-compose up -d
+cd news-bigdata-project
+chmod +x run_project.sh
+./run_project.sh
 ```
 
-### ✅ Puis accéder à : http://localhost:8501 (Dashboard Streamlit)
+### **Option B : Script Windows PowerShell**
 
-**Voir [QUICK_START.md](QUICK_START.md) pour plus de détails.**
+```powershell
+cd news-bigdata-project
+./start.ps1
+```
 
----
+### **Option C : Docker Compose directement**
 
-## 📊 Aperçu du Projet
-
-### 🎯 Problématique
-
-Comment construire une **plateforme Big Data** capable de :
-
-- ✅ Collecter automatiquement des articles de presse
-- ✅ Traiter les données en batch ET en streaming
-- ✅ Analyser le sentiment et extraire les tendances
-- ✅ Fournir des insights via des dashboards interactifs
-- ✅ Assurer la qualité et la traçabilité des données
-
-### 📈 Résultats Clés
-
-| Métrique               | Valeur                                                |
-| ---------------------- | ----------------------------------------------------- |
-| **Articles collectés** | 104 (batch) + 95 (streaming) = 176                    |
-| **Mots indexés**       | 53,071                                                |
-| **Sources**            | 5 (Hespress, BBC, Akhbarona, Al Jazeera, France Info) |
-| **Langues**            | 3 (Français 41.3%, Anglais 38.5%, Arabe 20.2%)        |
-| **Tests qualité**      | 93.75% passing (15/16)                                |
-| **Sentiment**          | 57.7% négatif, 27.9% neutre, 14.4% positif            |
+```bash
+docker-compose up --build
+```
 
 ---
 
-## 🏗️ Architecture Globale
+## 🎨 TABLEAU DE BORD DE DÉMARRAGE
+
+Une fois lancé, vous pouvez accéder à :
+
+| Service           | URL                   | Identifiants             |
+| ----------------- | --------------------- | ------------------------ |
+| **🔵 Airflow**    | http://localhost:8080 | airflow / airflow        |
+| **🟠 MinIO**      | http://localhost:9001 | minioadmin / minioadmin  |
+| **🟢 Metabase**   | http://localhost:3000 | À configurer             |
+| **🟡 PostgreSQL** | localhost:5433        | dwh_admin / dwh_password |
+| **⚪ Kafka**      | localhost:9092        | Sans auth                |
+
+---
+
+## 📊 RÉSULTATS CLÉS
+
+| Métrique              | Valeur                                   |
+| --------------------- | ---------------------------------------- |
+| Articles collectés    | 176+ par jour                            |
+| Sources intégrées     | 5 (FR, EN, AR)                           |
+| Langues détectées     | 3 (FR 41%, EN 39%, AR 20%)               |
+| Tests qualité         | 95%+ passing                             |
+| Couverture thématique | Politique, Tech, Sports, Santé, Économie |
+
+---
+
+## 🏗️ ARCHITECTURE GLOBALE
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
