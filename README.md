@@ -29,6 +29,8 @@ Le pipeline principal suit le flux suivant :
 
 `Sources Web -> Scrapers -> Kafka / ingestion -> Bronze -> Silver -> Gold -> PostgreSQL DWH -> Streamlit Dashboard`
 
+![Schéma global de l'architecture](image/README/schema_global_architecture.png)
+
 ## Architecture technique
 
 Le projet suit une architecture distribuée conteneurisée basée sur Docker Compose.
