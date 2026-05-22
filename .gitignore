@@ -54,3 +54,6 @@ PLAN_*.md
 run_all_scrapers.py
 PROJET_NEWS_BIGDATA_RECAP.md
 " | Out-File -Encoding UTF8 .gitignore
+
+QUICK_START.md
+start.ps1
