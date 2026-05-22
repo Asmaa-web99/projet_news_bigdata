@@ -39,6 +39,10 @@ class BronzeToSilverPipeline:
         )
         self.bronze_bucket = os.getenv('BUCKET_BRONZE', 'bronze')
         self.silver_bucket = os.getenv('BUCKET_SILVER', 'silver')
+        for bucket in [self.bronze_bucket, self.silver_bucket]:
+            if not self.minio_client.bucket_exists(bucket):
+                self.minio_client.make_bucket(bucket)
+                logger.info(f"✅ Bucket créé : {bucket}")
         logger.info("✅ Pipeline Bronze → Silver initialisé")
 
     def list_bronze_files(self) -> list:

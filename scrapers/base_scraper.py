@@ -46,6 +46,9 @@ class BaseScraper(ABC):
             secure=False
         )
         self.bronze_bucket = os.getenv('BUCKET_BRONZE', 'bronze')
+        if not self.minio_client.bucket_exists(self.bronze_bucket):
+            self.minio_client.make_bucket(self.bronze_bucket)
+            logger.info(f"✅ Bucket créé : {self.bronze_bucket}")
 
         # Déduplicator
         self.deduplicator = ArticleDeduplicator()

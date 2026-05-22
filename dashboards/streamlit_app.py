@@ -38,7 +38,11 @@ engine = get_engine()
 
 @st.cache_data(ttl=60)
 def load_data(query: str) -> pd.DataFrame:
-    return pd.read_sql(query, engine)
+    raw_conn = engine.raw_connection()
+    try:
+        return pd.read_sql_query(query, raw_conn)
+    finally:
+        raw_conn.close()
 
 
 # ================== HEADER ==================
@@ -305,6 +309,3 @@ df_articles = load_data(f"""
 """)
 st.dataframe(df_articles, use_container_width=True, hide_index=True)
 
-st.markdown("---")
-st.caption(f"💡 Dashboard généré le {datetime.now().strftime('%d/%m/%Y à %H:%M')} | "
-           f"Architecture Big Data : MinIO + PostgreSQL + Streamlit")

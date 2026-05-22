@@ -258,7 +258,7 @@ def run_quality_checks(**context):
         from quality.data_quality_checks import DataQualityFramework
         
         dq_framework = DataQualityFramework()
-        results = dq_framework.run_all_checks()
+        results = dq_framework.run_all()
         
         # Afficher résumé
         log.info(f"✅ Contrôles qualité terminés")
@@ -441,7 +441,13 @@ with DAG(
     init_env
 
     # Étape 1 : Scraping en parallèle (dépend de init_env)
-    [scrape_hespress, scrape_bbc, scrape_akhbarona, scrape_aljazeera, scrape_franceinfo] >> init_env
+    init_env >> [
+        scrape_hespress,
+        scrape_bbc,
+        scrape_akhbarona,
+        scrape_aljazeera,
+        scrape_franceinfo
+    ]
 
     # Étape 2 : Bronze → Silver (attendre tous les scrapers)
     [scrape_hespress, scrape_bbc, scrape_akhbarona, scrape_aljazeera, scrape_franceinfo] >> bronze_to_silver

@@ -1,517 +1,601 @@
-# 📰 NEWS BIG DATA PLATFORM
+# Projet News Big Data
 
-<div align="center">
+![Python](https://img.shields.io/badge/Python-3.10-blue)
+![Docker](https://img.shields.io/badge/Docker-Enabled-blue)
+![Airflow](https://img.shields.io/badge/Airflow-Orchestration-green)
+![Kafka](https://img.shields.io/badge/Kafka-Streaming-black)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-DWH-blue)
+![Streamlit](https://img.shields.io/badge/Streamlit-Dashboard-red)
 
-### **Plateforme Complète d'Ingestion, Transformation et Analyse de Médias**
+## Description du projet
 
-[![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://python.org)
-[![Docker](https://img.shields.io/badge/Docker-Compose-blue.svg)](https://docker.com)
-[![Airflow](https://img.shields.io/badge/Apache-Airflow-217346.svg)](https://airflow.apache.org)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-336791.svg)](https://postgresql.org)
-[![Status](https://img.shields.io/badge/Status-Production%20Ready-brightgreen.svg)]()
+`projet_news_bigdata` est une plateforme Big Data d’analyse de médias qui automatise la collecte, le stockage, la transformation et la visualisation d’articles de presse provenant de plusieurs sources web. Le projet met en œuvre une Architecture Médaillon (Bronze / Silver / Gold), un Data Lake MinIO, un Data Warehouse PostgreSQL, une orchestration Apache Airflow et un Dashboard Streamlit.
 
-**Master Data Engineering & Big Data • Mai 2026**
+L’objectif pédagogique est de présenter un pipeline de données de bout en bout, depuis l’acquisition d’articles jusqu’à leur exploitation analytique.
 
-</div>
+## Objectifs
 
----
+- Collecter automatiquement des articles depuis plusieurs sites d’actualité.
+- Centraliser les données brutes dans un Data Lake MinIO.
+- Transformer et enrichir les contenus avec un traitement NLP simple.
+- Produire des données analytiques consolidées via une Architecture Médaillon (Bronze / Silver / Gold).
+- Charger les résultats dans un Data Warehouse PostgreSQL.
+- Orchestrer l’ensemble du pipeline avec Apache Airflow.
+- Visualiser les indicateurs dans un Dashboard Streamlit.
 
-## 🎯 OBJECTIF DU PROJET
+## Architecture globale
 
-Construire une **plateforme Big Data professionnelle et scalable** capable de :
+Le pipeline principal suit le flux suivant :
 
-✅ **Collecter** articles de presse depuis 5 sources (Hespress, BBC, Akhbarona, Al Jazeera, France Info)  
-✅ **Ingérer** via approche batch (horaire) et streaming (futur)  
-✅ **Transformer** selon l'architecture Médaillon (Bronze → Silver → Gold)  
-✅ **Analyser** sentiment, tendances, mots-clés  
-✅ **Gouverner** avec contrôles qualité et traçabilité complète  
-✅ **Visualiser** dans un Data Warehouse et tableaux de bord Metabase  
-✅ **Orchestrer** tout via Airflow avec UN seul point d'entrée
+`Sources Web -> Scrapers -> Kafka / ingestion -> Bronze -> Silver -> Gold -> PostgreSQL DWH -> Streamlit Dashboard`
 
----
+## Architecture technique
 
-## 🚀 DÉMARRAGE EN 2 MINUTES
+Le projet suit une architecture distribuée conteneurisée basée sur Docker Compose.
 
-### **Option A : Script Linux/Mac**
+Chaque composant est isolé dans un service dédié :
 
-```bash
-cd news-bigdata-project
-chmod +x run_project.sh
-./run_project.sh
+- ingestion
+- orchestration
+- stockage
+- streaming
+- visualisation
+- Data Warehouse
+
+Cette approche facilite :
+
+- la portabilité
+- la reproductibilité
+- la maintenance
+- le déploiement
+
+## Schéma textuel de l’architecture
+
+```text
++---------------------------+
+| Sources de données web    |
+| BBC, Hespress, FranceInfo |
+| Al Jazeera, Akhbarona     |
++-------------+-------------+
+              |
+              v
++---------------------------+
+| Scrapers Python           |
+| + ingestion streaming     |
+| via Kafka                 |
++-------------+-------------+
+              |
+              v
++---------------------------+
+| Data Lake MinIO           |
+| Bronze : JSON bruts       |
+| Silver : Parquet enrichi  |
+| Gold   : Parquet analytique|
++-------------+-------------+
+              |
+              v
++---------------------------+
+| Data Warehouse PostgreSQL |
+| Schéma analytique         |
++-------------+-------------+
+              |
+              v
++---------------------------+
+| Dashboard Streamlit       |
+| KPIs, langues, sentiments |
+| sources, mots-clés        |
++---------------------------+
+
+Orchestration transversale : Apache Airflow
+Contrôle qualité           : quality/data_quality_checks.py
+Gouvernance documentaire   : governance/data_catalog.md
 ```
 
-### **Option B : Script Windows PowerShell**
+## Technologies utilisées
 
-```powershell
-cd news-bigdata-project
-./start.ps1
-```
+| Technologie              | Rôle dans le projet                               |
+| ------------------------ | -------------------------------------------------- |
+| Python                   | Développement des scrapers, ETL, NLP et dashboard |
+| Docker / Docker Compose  | Conteneurisation et lancement des services         |
+| Apache Airflow           | Orchestration du pipeline                          |
+| Apache Kafka             | Couche d’ingestion et de streaming                |
+| Zookeeper                | Coordination Kafka                                 |
+| MinIO                    | Data Lake compatible S3                            |
+| PostgreSQL               | Data Warehouse analytique                          |
+| Streamlit                | Dashboard de visualisation                         |
+| Pandas                   | Manipulation et transformation des données        |
+| Plotly                   | Visualisations interactives                        |
+| SQLAlchemy               | Connexion et chargement vers PostgreSQL            |
+| BeautifulSoup / Requests | Web scraping                                       |
+| LangDetect / NLP simple  | Détection de langue, mots-clés et sentiment      |
 
-### **Option C : Docker Compose directement**
+## Structure du dossier
 
-```bash
-docker-compose up --build
-```
+La structure observée dans le dépôt est la suivante :
 
----
-
-## 🎨 TABLEAU DE BORD DE DÉMARRAGE
-
-Une fois lancé, vous pouvez accéder à :
-
-| Service           | URL                   | Identifiants             |
-| ----------------- | --------------------- | ------------------------ |
-| **🔵 Airflow**    | http://localhost:8080 | airflow / airflow        |
-| **🟠 MinIO**      | http://localhost:9001 | minioadmin / minioadmin  |
-| **🟢 Metabase**   | http://localhost:3000 | À configurer             |
-| **🟡 PostgreSQL** | localhost:5433        | dwh_admin / dwh_password |
-| **⚪ Kafka**      | localhost:9092        | Sans auth                |
-
----
-
-## 📊 RÉSULTATS CLÉS
-
-| Métrique              | Valeur                                   |
-| --------------------- | ---------------------------------------- |
-| Articles collectés    | 176+ par jour                            |
-| Sources intégrées     | 5 (FR, EN, AR)                           |
-| Langues détectées     | 3 (FR 41%, EN 39%, AR 20%)               |
-| Tests qualité         | 95%+ passing                             |
-| Couverture thématique | Politique, Tech, Sports, Santé, Économie |
-
----
-
-## 🏗️ ARCHITECTURE GLOBALE
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                   SOURCES DE DONNÉES                        │
-│         Hespress | BBC | Akhbarona | Al Jazeera | FranceInfo│
-└──────────────┬──────────────────────────┬───────────────────┘
-               │ Scrapers                 │ RSS Feeds
-        ┌──────▼─────────────────────────▼───────┐
-        │   PHASE D'INGESTION                    │
-        │   Batch (Airflow) + Streaming (Kafka)  │
-        └──────┬─────────────────────────────────┘
-               │
-        ┌──────▼──────────────────────┐
-        │   DATA LAKE (MinIO)         │
-        │   🟦 Bronze (Raw)           │
-        │   🟩 Silver (Cleaned+NLP)   │
-        │   🟨 Gold (Aggregated)      │
-        └──────┬──────────────────────┘
-               │ Transformations
-        ┌──────▼──────────────────────┐
-        │  DATA WAREHOUSE            │
-        │  PostgreSQL Star Schema    │
-        │  fact_articles + dimensions│
-        └──────┬──────────────────────┘
-               │
-        ┌──────▼──────────────────────┐
-        │   VISUALISATION            │
-        │   📊 Streamlit Dashboard   │
-        │   📈 Metabase BI           │
-        └───────────────────────────┘
-
-ORCHESTRATION (Airflow) | QUALITÉ (Great Expectations) | MONITORING
-```
-
----
-
-## 🛠️ Stack Technique
-
-### Infrastructure & Services
-
-| Service               | Rôle                         | Port      |
-| --------------------- | ---------------------------- | --------- |
-| **MinIO**             | Data Lake S3-compatible      | 9000/9001 |
-| **Kafka + Zookeeper** | Message Broker (streaming)   | 9092      |
-| **PostgreSQL**        | Data Warehouse               | 5433      |
-| **Apache Airflow**    | Orchestration des DAGs       | 8080      |
-| **Metabase**          | Business Intelligence        | 3000      |
-| **Streamlit**         | Dashboard interactif         | 8501      |
-| **Docker Compose**    | Orchestration des conteneurs | -         |
-
-### Langages & Frameworks
-
-- **Python 3.11** : Langue principale
-- **BeautifulSoup + Requests** : Web scraping
-- **Kafka-Python-ng** : Streaming
-- **Pandas + NumPy** : Manipulation de données
-- **NLTK + LangDetect** : NLP multilingue
-- **SQLAlchemy** : ORM Database
-- **Streamlit** : Frontend data apps
-- **PyArrow** : Format Parquet
-
----
-
-## 📂 Structure du Projet
-
-```
+```text
 projet_news_bigdata/
-│
-├── scrapers/                    # 🔗 Web Scrapers (5 sources)
-│   ├── base_scraper.py         # Classe abstraite avec retry logic
-│   ├── hespress_scraper.py     # Hespress (FR)
-│   ├── bbc_scraper.py          # BBC (EN)
-│   ├── akhbarona_scraper.py    # Akhbarona (AR)
-│   ├── aljazeera_scraper.py    # Al Jazeera (EN/AR)
-│   ├── franceinfo_scraper.py   # France Info (FR)
-│   └── utils.py                # Utilities (logger, retry)
-│
-├── streaming/                   # 📡 Ingestion Streaming (Kafka)
-│   ├── rss_producer.py         # RSS → Kafka Producer
-│   └── kafka_to_bronze_consumer.py  # Kafka → MinIO Bronze
-│
-├── medallion/                   # 🏗️ Architecture Médaillon
-│   ├── bronze_to_silver.py     # Nettoyage + NLP
-│   ├── silver_to_gold.py       # Agrégation
-│   └── nlp_utils.py            # Sentiment, keywords, language detection
-│
-├── warehouse/                   # 🗄️ Data Warehouse
-│   ├── schema.sql              # Star Schema (fact_articles + dimensions)
-│   └── load_to_dwh.py          # Gold → PostgreSQL
-│
-├── dags/                        # 🔄 Orchestration Airflow
-│   ├── dag_batch_scraping.py   # Scraping batch (@hourly)
-│   ├── dag_medallion_pipeline.py   # Bronze→Silver→Gold (@hourly)
-│   └── dag_dwh_loading.py      # Gold→DWH (@hourly)
-│
-├── dashboards/                  # 📊 Visualisation
-│   └── streamlit_app.py        # Dashboard interactif
-│
-├── quality/                     # ✅ Qualité des Données
-│   └── data_quality_checks.py  # Tests Great Expectations
-│
-├── docker-compose.yml           # Configuration 7 services
-├── requirements.txt             # Dépendances Python
-├── .env.example                 # Variables d'environnement
-├── QUICK_START.md              # Guide démarrage rapide
-├── start.ps1                   # Script démarrage Windows
-└── README.md                   # Ce fichier
+|
+|-- dags/
+|-- dashboards/
+|-- data/
+|-- governance/
+|-- logs/
+|-- medallion/
+|-- quality/
+|-- scrapers/
+|-- streaming/
+|-- warehouse/
+|
+|-- .env
+|-- .env.example
+|-- .gitignore
+|-- docker-compose.yml
+|-- Dockerfile
+|-- README.md
+|-- requirements.txt
+|-- run_all_scrapers.py
 ```
 
----
+## Prérequis
 
-## 🚀 Installation & Démarrage
+Avant de lancer le projet, vérifier les points suivants :
 
-### Prérequis
+- Docker Desktop doit être installé et démarré.
+- Les ports `8080`, `8501`, `9001`, `5433`, `9092` et `2181` doivent être libres.
+- Un terminal ouvert dans le dossier racine du projet est nécessaire.
+- Le fichier `.env` doit être présent à la racine du projet.
+- Le fichier `.env` contient les variables de configuration nécessaires au fonctionnement des services Docker Compose.
+- Il est recommandé d’avoir suffisamment d’espace disque pour les volumes Docker.
 
-- ✅ **Docker Desktop** (ou docker-compose)
-- ✅ **Git**
-- ✅ **Python 3.9+** (optionnel, pour développement local)
-- ✅ ~5 GB d'espace disque
+## Installation
 
-### Étapes
-
-**1️⃣ Cloner le repository**
+### 1. Se placer dans le projet
 
 ```bash
-git clone https://github.com/Asmaa-web99/projet_news_bigdata.git
 cd projet_news_bigdata
 ```
 
-**2️⃣ Démarrer tous les services**
+### 2. Vérifier la présence du fichier `.env`
+
+Le projet s’appuie sur un fichier `.env` à la racine pour configurer MinIO, PostgreSQL, Kafka et Airflow.
+
+Si besoin, vous pouvez partir de l’exemple fourni :
+
+Sous Linux / macOS :
 
 ```bash
-# Windows PowerShell (recommandé - avec script)
-.\start.ps1
-
-# Ou en ligne de commande
-docker-compose up -d
+cp .env.example .env
 ```
 
-**3️⃣ Attendre 2-3 minutes** que les services démarrent
+Sous PowerShell :
 
-**4️⃣ Accéder aux dashboards**
-
-| Interface               | URL                   | Purpose                                          |
-| ----------------------- | --------------------- | ------------------------------------------------ |
-| **Streamlit** (📊 MAIN) | http://localhost:8501 | Dashboard articles, sentiments, stats            |
-| **Airflow** (🔄)        | http://localhost:8080 | Orchestration DAGs (user: airflow/airflow)       |
-| **MinIO** (💾)          | http://localhost:9001 | Data Lake explorer (user: minioadmin/minioadmin) |
-| **Metabase** (📈)       | http://localhost:3000 | Advanced BI & SQL queries                        |
-| **PostgreSQL** (🗄️)     | localhost:5433        | DWH (user: dwh_admin/dwh_password)               |
-
----
-
-## 📋 Flux de Données Complet
-
-### Phase 1 : Ingestion
-
-```
-Website → Scraper → Kafka Topic
-                  → MinIO Bronze/articles_raw.parquet
+```powershell
+Copy-Item .env.example .env
 ```
 
-Sources :
-
-- **Batch** : 5 web scrapers lancés toutes les heures via Airflow
-- **Streaming** : RSS feeds vers Kafka, puis MinIO
-
-### Phase 2 : Transformation (Médaillon)
-
-```
-Bronze (Raw JSON)
-    ↓ [bronze_to_silver.py]
-Silver (Cleaned + NLP)
-    - Suppression HTML
-    - Détection langue (FR/EN/AR)
-    - Sentiment analysis
-    - Extraction keywords (TF-IDF)
-    - Text statistics
-    ↓ [silver_to_gold.py]
-Gold (Aggregated)
-    - fact_articles table
-    - dim_sources, dim_languages, dim_sentiment
-```
-
-### Phase 3 : Entreposage
-
-```
-Gold (MinIO Parquet)
-    ↓ [load_to_dwh.py]
-PostgreSQL Data Warehouse
-    - Star schema optimisé
-    - Indexes sur fact_articles
-    - Queries < 1sec
-```
-
-### Phase 4 : Visualisation
-
-```
-PostgreSQL ↓
-Streamlit Dashboard
-    - KPIs (total articles, sources, langs)
-    - Sentiment distribution (pie chart)
-    - Articles par source (bar chart)
-    - Tableau détaillé (dataframe)
-    - Filtres interactifs
-
-Metabase
-    - Requêtes SQL libres
-    - Dashboards éditables
-    - Export rapports
-```
-
----
-
-## 🔄 Orchestration (Airflow)
-
-### 3 DAGs principaux
-
-| DAG                        | Schedule               | Fonction                            |
-| -------------------------- | ---------------------- | ----------------------------------- |
-| **dag_batch_scraping**     | @hourly                | Lance les 5 scrapers → MinIO Bronze |
-| **dag_medallion_pipeline** | @hourly (+10min delay) | Bronze→Silver→Gold                  |
-| **dag_dwh_loading**        | @hourly (+20min delay) | Gold→PostgreSQL                     |
-
-**Airflow UI:** http://localhost:8080
-
-Pour déclencher manuellement :
-
-1. Allez à http://localhost:8080
-2. Trouvez le DAG (ex: dag_batch_scraping)
-3. Cliquez sur "Trigger DAG" (bouton play)
-4. Suivez l'exécution dans "Graph View"
-
----
-
-## 📊 Dashboards
-
-### Streamlit (Recommandé pour voir les résultats)
-
-**URL:** http://localhost:8501
-
-**Affiche:**
-
-- 📈 KPIs : Total articles, sources, langues
-- 📊 Sentiment distribution (pie chart)
-- 🌍 Articles par source et langue
-- 🔤 Mots-clés dominants
-- 📋 Tableau détaillé d'articles avec filtres
-- 🎯 Statistiques textuelles
-
-### Metabase (Pour BI avancée)
-
-**URL:** http://localhost:3000
-
-Requêtes SQL sur PostgreSQL DWH pour analyses avancées.
-
----
-
-## ✅ Qualité des Données
-
-### Framework Great Expectations
-
-Tests automatisés dans `quality/data_quality_checks.py`
-
-**Couverture :** 16 tests sur 4 dimensions
-
-| Dimension      | Tests             | Result            |
-| -------------- | ----------------- | ----------------- |
-| **Complétude** | Champs non-null   | ✅ 100%           |
-| **Conformité** | Types & formats   | ✅ 100%           |
-| **Validité**   | Cohérence logique | ✅ 75%            |
-| **Unicité**    | Pas de doublons   | ✅ 100%           |
-| **TOTAL**      | 16 tests          | ✅ 93.75% passing |
-
----
-
-## 🔒 Sécurité & Configuration
-
-### Variables d'environnement
-
-Fichier `.env.example` fourni. À copier et adapter :
+### 3. Vérifier la configuration Docker Compose
 
 ```bash
-# MinIO
-MINIO_ENDPOINT=localhost:9000
-MINIO_ACCESS_KEY=minioadmin
-MINIO_SECRET_KEY=minioadmin
-
-# Buckets
-BUCKET_BRONZE=bronze
-BUCKET_SILVER=silver
-BUCKET_GOLD=gold
-
-# Kafka
-KAFKA_BROKER=localhost:9092
-KAFKA_TOPIC_NEWS=news_streaming
-
-# Data Warehouse
-DWH_HOST=localhost
-DWH_PORT=5433
-DWH_DATABASE=news_warehouse
-DWH_USER=dwh_admin
-DWH_PASSWORD=dwh_password
+docker compose config
 ```
 
----
+## Exécution avec Docker
 
-## 🛑 Arrêter le Projet
+Pour un premier lancement, une démonstration propre ou après modification du projet, la commande recommandée est :
 
 ```bash
-# Arrêter les services
-docker-compose down
-
-# Arrêter + supprimer les données (attention!)
-docker-compose down -v
+docker compose up -d --build
 ```
 
----
+Cette commande :
 
-## 📚 Documentation Additionnelle
+- reconstruit les images si nécessaire
+- démarre les services en arrière-plan
+- initialise l’environnement complet
 
-- **[QUICK_START.md](QUICK_START.md)** : Guide rapide 2 minutes
-- **[rapport/main.pdf](rapport/main.pdf)** : Rapport académique complet
-- **Code source** : Commentaires détaillés dans chaque fichier `.py`
+Au premier démarrage, l’initialisation des services peut prendre quelques minutes, en particulier pour Airflow, PostgreSQL et MinIO.
 
----
-
-## 🔧 Troubleshooting
-
-### "Port already in use"
+Si vous souhaitez afficher les logs au premier plan pour observer le démarrage :
 
 ```bash
-# Identifier le processus
-lsof -i :8501
-
-# Ou modifier docker-compose.yml
-# "8501:8501" → "8502:8501"
+docker compose up
 ```
 
-### Services ne démarrent pas
+Pour arrêter les services :
 
 ```bash
-# Voir les logs
-docker-compose logs -f
-
-# Ou d'un service spécifique
-docker-compose logs airflow
+docker compose down
 ```
 
-### Problème de connexion MinIO
+Pour effectuer un redémarrage propre recommandé :
 
 ```bash
-# Vérifier la santé
-docker-compose ps
-
-# Redémarrer MinIO
-docker-compose restart minio
+docker compose down --remove-orphans
+docker compose up -d --build
 ```
 
----
+Pour repartir complètement de zéro en supprimant aussi les volumes :
 
-## 📊 Métriques & Performances
+```bash
+docker compose down -v
+docker compose up -d --build
+```
 
-### Volumes traités
+## Services d’initialisation
 
-| Layer  | Format     | Taille | Articles |
-| ------ | ---------- | ------ | -------- |
-| Bronze | Parquet    | 12 MB  | 176      |
-| Silver | Parquet    | 8 MB   | 176      |
-| Gold   | Parquet    | 2 MB   | Agrégées |
-| DWH    | PostgreSQL | 5 MB   | 176      |
+Deux services d’initialisation s’exécutent automatiquement au démarrage :
 
-### Vitesse de traitement
+- `airflow-init` initialise la base Apache Airflow et crée l’utilisateur administrateur.
+- `minio-init` crée automatiquement les buckets `bronze`, `silver` et `gold` dans le Data Lake MinIO.
 
-- **Scraping** : ~50-100 articles/min
-- **Bronze→Silver** : ~1000 articles/sec
-- **Silver→Gold** : ~5000 articles/sec
-- **DWH queries** : < 1 sec
+Point important : après leur exécution, l’état `Exited (0)` de `airflow-init` et `minio-init` est normal. Ce ne sont pas des services qui doivent rester actifs en continu.
 
----
+## Services, URLs et ports
 
-## 🎓 Pour la Soutenance
+| Service             | URL / accès          | Port hôte | Remarque                     |
+| ------------------- | --------------------- | ---------- | ---------------------------- |
+| Airflow             | http://localhost:8080 | 8080       | Interface d’orchestration   |
+| MinIO Console       | http://localhost:9001 | 9001       | Interface du Data Lake MinIO |
+| MinIO API           | http://localhost:9000 | 9000       | API S3 compatible            |
+| Streamlit Dashboard | http://localhost:8501 | 8501       | Visualisation finale         |
+| PostgreSQL DWH      | `localhost:5433`    | 5433       | Base analytique              |
+| Kafka               | `localhost:9092`    | 9092       | Broker de messages           |
+| Zookeeper           | `localhost:2181`    | 2181       | Support Kafka                |
 
-### Fichiers importants
+## Identifiants par défaut
 
-- **Code source :** `scrapers/`, `medallion/`, `dags/`, `warehouse/`, `dashboards/`, `quality/`
-- **Configuration :** `docker-compose.yml`, `.env.example`, `requirements.txt`
-- **Rapport** : `rapport/main.pdf`
-- **This README** : `README.md`
+| Service        | Identifiant    | Mot de passe     |
+| -------------- | -------------- | ---------------- |
+| Airflow        | `airflow`    | `airflow`      |
+| MinIO          | `minioadmin` | `minioadmin`   |
+| PostgreSQL DWH | `dwh_admin`  | `dwh_password` |
 
-### Démonstration recommandée
+## Validation rapide après démarrage
 
-1. Ouvrir le dashboard Streamlit (http://localhost:8501)
-2. Montrer les articles, sentiments, tendances
-3. Ouvrir Airflow pour montrer l'orchestration
-4. Ouvrir MinIO pour montrer le Data Lake
-5. Montrer le code des scrapers et transformations
+Après `docker compose up -d --build`, vérifier rapidement les points suivants :
 
----
+1. Ouvrir Airflow sur `http://localhost:8080` et se connecter avec `airflow / airflow`.
+2. Ouvrir MinIO sur `http://localhost:9001` et se connecter avec `minioadmin / minioadmin`.
+3. Ouvrir Streamlit sur `http://localhost:8501`.
+4. Vérifier dans MinIO que les buckets `bronze`, `silver` et `gold` existent.
+5. Vérifier dans Airflow que le DAG `news_bigdata_pipeline` apparaît.
+6. Déclencher le DAG `news_bigdata_pipeline` depuis Airflow pour alimenter MinIO, PostgreSQL et le Dashboard Streamlit.
 
-## 🚀 Perspectives Futures
+Si vous souhaitez vérifier l’état des conteneurs :
 
-### Court terme
+```bash
+docker compose ps
+```
 
-- Ajouter plus de sources (Reddit, Twitter, YouTube)
-- Machine Learning : classification, clustering
-- Alertes temps réel (Slack, Email)
+## Sources de données
 
-### Moyen terme
+Les sources effectivement prises en charge dans le code sont :
 
-- Déploiement cloud (AWS, GCP)
-- Advanced NLP : Named Entity Recognition (NER)
-- Fake news detection
-- API REST (FastAPI)
+- BBC
+- Hespress
+- FranceInfo
+- Al Jazeera
+- Akhbarona
 
-### Long terme
+## Pipeline principal Airflow
 
-- Recommandation système
-- Monitoring avancé (Prometheus, Grafana)
-- MLOps pipeline
-- Monetization : API commerciale
+Le DAG principal est `news_bigdata_pipeline`, défini dans `dags/news_pipeline_dag.py`.
 
----
+Il orchestre les tâches suivantes :
 
-## 📞 Support
+1. `setup_environment`
+2. `scrape_hespress`
+3. `scrape_bbc`
+4. `scrape_akhbarona`
+5. `scrape_aljazeera`
+6. `scrape_franceinfo`
+7. `bronze_to_silver_transformation`
+8. `silver_to_gold_transformation`
+9. `load_gold_to_dwh`
+10. `data_quality_checks`
+11. `prepare_metabase_dashboard`
 
-Pour des questions sur l'architecture ou le déploiement, consultez les commentaires dans les fichiers Python ou la documentation Docker Compose.
+Remarque : la dernière tâche conserve un nom historique orienté "Metabase" dans le code, mais l’interface de visualisation finale du projet est bien Streamlit. Il ne faut donc pas attendre une interface Metabase active dans cette version.
 
----
+## Explication du pipeline
 
-**GitHub Repository:** https://github.com/Asmaa-web99/projet_news_bigdata
+### 1. Collecte
 
-**Status:** ✅ Production Ready | 🎓 Académique | 🏆 Master Data Engineering
+Les scrapers Python récupèrent les articles depuis les sites cibles et produisent des enregistrements structurés.
+
+### 2. Ingestion
+
+Le projet contient une couche streaming dans `streaming/`, avec Apache Kafka, notamment `streaming/kafka_to_bronze_consumer.py` et `streaming/rss_producer.py`.
+
+### 3. Bronze
+
+Les données brutes sont stockées dans le Data Lake MinIO sous forme de fichiers JSON. Cette couche conserve les articles dans un état proche de la source.
+
+### 4. Silver
+
+La transformation `medallion/bronze_to_silver.py` applique :
+
+- nettoyage HTML
+- validation minimale des articles
+- détection de langue
+- extraction de mots-clés
+- statistiques textuelles
+- analyse de sentiment simple
+
+La sortie Silver est stockée au format Parquet.
+
+### 5. Gold
+
+La transformation `medallion/silver_to_gold.py` consolide les données Silver et produit des tables analytiques telles que :
+
+- `articles_by_source`
+- `articles_by_language`
+- `articles_by_country`
+- `articles_by_category`
+- `top_keywords`
+- `top_keywords_by_language`
+- `global_stats`
+- `fact_articles`
+
+### 6. Chargement DWH
+
+Le module `warehouse/load_to_dwh.py` charge la table `fact_articles` vers le Data Warehouse PostgreSQL à partir de la couche Gold.
+
+### 7. Qualité
+
+Le module `quality/data_quality_checks.py` exécute des contrôles sur Bronze, Silver et le DWH.
+
+### 8. Visualisation
+
+Le Dashboard Streamlit, défini dans `dashboards/streamlit_app.py`, lit les données depuis PostgreSQL et affiche des indicateurs analytiques.
+
+## Couche Streaming Kafka
+
+Le projet intègre une architecture de streaming basée sur Apache Kafka.
+
+Les producteurs publient les flux RSS et les consommateurs alimentent la couche Bronze du Data Lake MinIO.
+
+Composants principaux :
+
+- `streaming/rss_producer.py`
+- `streaming/kafka_to_bronze_consumer.py`
+
+Apache Kafka permet :
+
+- l’ingestion temps réel
+- le découplage des composants
+- la scalabilité du pipeline
+- la résilience des flux de données
+
+## Architecture Médaillon (Bronze / Silver / Gold)
+
+L’architecture Médaillon (Bronze / Silver / Gold) organise les données en trois couches :
+
+### Bronze
+
+- Données brutes issues du scraping ou de l’ingestion
+- Format principal : JSON
+- Objectif : conserver une trace fidèle de la source
+
+### Silver
+
+- Données nettoyées et enrichies
+- Format principal : Parquet
+- Objectif : préparer des données fiables et homogènes pour l’analyse
+
+### Gold
+
+- Données consolidées et tables analytiques
+- Format principal : Parquet
+- Objectif : fournir des jeux de données prêts pour le reporting et le chargement DWH
+
+## Data Lake MinIO
+
+Le Data Lake MinIO joue le rôle de stockage central du projet.
+
+Les buckets `bronze`, `silver` et `gold` sont créés automatiquement au démarrage par le service `minio-init`.
+
+Rôle des couches dans le Data Lake MinIO :
+
+- `bronze` : données brutes issues du scraping ou du streaming
+- `silver` : données nettoyées et enrichies
+- `gold` : données consolidées et prêtes pour l’analyse
+
+Intérêt de ce choix :
+
+- stockage objet simple à manipuler
+- compatibilité S3
+- séparation claire des étapes du pipeline
+- conservation des données intermédiaires pour audit et rejouabilité
+
+## Data Warehouse PostgreSQL
+
+Le Data Warehouse PostgreSQL est initialisé par `warehouse/schema.sql`.
+
+Le schéma observé comprend :
+
+- `dim_source`
+- `dim_language`
+- `dim_date`
+- `fact_articles`
+
+Ce modèle permet :
+
+- l’analyse par source
+- l’analyse par langue
+- l’analyse temporelle
+- le suivi des sentiments, mots-clés et volumes d’articles
+
+## Dashboard Streamlit
+
+Le Dashboard Streamlit affiche notamment :
+
+- le nombre total d’articles
+- la répartition par source
+- la distribution par langue
+- l’analyse de sentiment
+- les mots-clés tendance
+- un tableau détaillé des articles
+
+Point important : le Dashboard Streamlit dépend du chargement réussi du Data Warehouse PostgreSQL. Si le DWH est vide ou si le chargement Gold vers PostgreSQL n’a pas abouti, le Dashboard Streamlit ne pourra pas afficher correctement les résultats.
+
+## Résultats obtenus
+
+Le pipeline permet :
+
+- la collecte automatisée d’articles multilingues
+- le stockage des données dans un Data Lake MinIO
+- la transformation des données via une architecture Médaillon (Bronze / Silver / Gold)
+- l’analyse de sentiment des articles
+- l’extraction de mots-clés tendances
+- la visualisation interactive des données via Streamlit
+- l’orchestration complète avec Apache Airflow
+
+## Qualité et gouvernance des données
+
+Le projet contient deux briques dédiées :
+
+- `quality/` pour les contrôles automatiques de qualité
+- `governance/` pour la documentation de gouvernance et de dictionnaire de données
+
+Les contrôles de qualité couvrent principalement :
+
+- la présence des fichiers Bronze
+- la présence des titres, contenus et URLs
+- la détection correcte des langues
+- l’extraction des mots-clés
+- la cohérence des scores de sentiment
+- l’absence de doublons logiques
+- l’intégrité référentielle dans le DWH
+
+Le document `governance/data_catalog.md` sert de base de gouvernance documentaire pour décrire les données, leur usage et leur traçabilité.
+
+## Captures d’écran
+
+Cette section peut être complétée avant la soutenance avec des captures réelles du projet.
+
+### Airflow
+
+- DAG `news_bigdata_pipeline`
+- exécution complète du pipeline
+
+### MinIO
+
+- buckets `bronze`, `silver` et `gold`
+
+### Streamlit
+
+- dashboard Streamlit analytique interactif
+- analyse des sentiments
+- tendances des mots-clés
+
+## Commandes utiles
+
+```bash
+docker compose config
+docker compose up -d --build
+docker compose down
+docker compose down --remove-orphans
+docker compose down -v
+docker compose ps
+```
+
+Commande utile supplémentaire selon le contexte :
+
+```bash
+python run_all_scrapers.py
+```
+
+## Dépannage
+
+### 1. Docker ne démarre pas
+
+- Vérifier que Docker Desktop est bien lancé.
+- Vérifier qu’aucun message d’erreur n’apparaît dans l’état Docker.
+
+### 2. Les ports sont déjà utilisés
+
+Vérifier que les ports suivants sont libres avant le lancement :
+
+- `8080`
+- `8501`
+- `9001`
+- `5433`
+- `9092`
+- `2181`
+
+En cas de conflit, fermer le service qui utilise déjà le port ou modifier le mapping dans `docker-compose.yml`.
+
+### 3. Airflow n’est pas accessible
+
+- Attendre quelques minutes après `docker compose up -d --build`.
+- Vérifier l’état des conteneurs avec `docker compose ps`.
+- Vérifier que `airflow-init` apparaît bien en `Exited (0)`, ce qui est normal.
+- Effectuer un redémarrage propre si besoin :
+
+```bash
+docker compose down --remove-orphans
+docker compose up -d --build
+```
+
+### 4. MinIO est accessible mais les buckets n’existent pas
+
+- Vérifier que `minio-init` s’est bien exécuté.
+- Vérifier que `minio-init` est en `Exited (0)`, ce qui est normal après création des buckets.
+- Relancer proprement l’environnement si nécessaire :
+
+```bash
+docker compose down --remove-orphans
+docker compose up -d --build
+```
+
+### 5. Les scrapers ne collectent rien
+
+Si aucune nouvelle donnée n’est récupérée :
+
+- vérifier que les sites sources sont accessibles et n’ont pas changé leur structure HTML
+- vérifier les logs Airflow des tâches `scrape_*`
+- supprimer le fichier `logs/seen_articles.txt` pour autoriser une nouvelle collecte visible
+
+Ce fichier sert à éviter les doublons déjà vus. Le supprimer permet de relancer une collecte complète.
+
+### 6. Le Dashboard Streamlit est vide
+
+- Vérifier que le DAG `news_bigdata_pipeline` est visible dans Airflow.
+- Vérifier qu’au moins une exécution du pipeline a réussi jusqu’à `load_gold_to_dwh`.
+- Vérifier que PostgreSQL contient des données dans `fact_articles`.
+- Vérifier dans MinIO que les couches `bronze`, `silver` et `gold` contiennent bien des fichiers.
+
+En pratique, un Dashboard Streamlit vide signifie le plus souvent que :
+
+- les scrapers n’ont pas produit de nouvelles données
+- les transformations Bronze vers Silver ou Silver vers Gold ont échoué
+- le chargement Gold vers PostgreSQL n’a pas abouti
+
+### 7. Besoin de repartir proprement
+
+Si l’environnement est incohérent ou si vous souhaitez relancer une démonstration propre :
+
+```bash
+docker compose down --remove-orphans
+docker compose up -d --build
+```
+
+Si vous souhaitez supprimer également les volumes pour repartir de zéro :
+
+```bash
+docker compose down -v
+docker compose up -d --build
+```
+
+## Important
+
+- `logs/seen_articles.txt` peut bloquer une nouvelle collecte visible si les articles ont déjà été mémorisés.
+
+## Auteur
+
+Projet réalisé dans le cadre d’un projet académique Big Data / Data Engineering.
+Spécialité : Intelligence Artificielle & Data Science.
+
+Ce projet illustre la conception d’une chaîne de traitement de données moderne combinant scraping, ingestion, Data Lake, architecture Médaillon (Bronze / Silver / Gold), entreposage analytique, orchestration et visualisation.

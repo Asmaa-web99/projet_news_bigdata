@@ -29,6 +29,10 @@ class SilverToGoldPipeline:
         )
         self.silver_bucket = os.getenv('BUCKET_SILVER', 'silver')
         self.gold_bucket = os.getenv('BUCKET_GOLD', 'gold')
+        for bucket in [self.silver_bucket, self.gold_bucket]:
+            if not self.minio_client.bucket_exists(bucket):
+                self.minio_client.make_bucket(bucket)
+                logger.info(f"✅ Bucket créé : {bucket}")
         logger.info("✅ Pipeline Silver → Gold initialisé")
 
     def read_silver_data(self) -> pd.DataFrame:

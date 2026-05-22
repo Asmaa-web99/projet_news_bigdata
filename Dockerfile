@@ -14,15 +14,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 USER airflow
 
-# Copier le fichier requirements.txt et installer les dépendances Python
+# Copier le fichier requirements.txt et installer uniquement les dépendances métier.
+# Airflow est déjà fourni par l'image de base.
 COPY requirements.txt /tmp/requirements.txt
 RUN pip install --no-cache-dir -r /tmp/requirements.txt
-
-# Installer les providers Airflow spécifiques
-RUN pip install --no-cache-dir \
-    apache-airflow-providers-postgres==5.7.1 \
-    apache-airflow-providers-apache-kafka==1.2.0 \
-    apache-airflow-providers-minio==3.3.0
 
 # Copier la structure du projet dans le conteneur
 COPY --chown=airflow:root dags /opt/airflow/dags
